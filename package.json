@@ -1,6 +1,6 @@
 {
   "name": "@badeball/cypress-configuration",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Jonas Amundsen",
   "license": "MIT",
   "homepage": "https://github.com/badeball/cypress-configuration",
