@@ -185,7 +185,9 @@ export function resolveConfiguration(options: {
   env: NodeJS.ProcessEnv;
   cwd: string;
 }): ICypressConfiguration {
-  debug(`attempting to resolve Cypress configuration using ${options}`);
+  debug(
+    `attempting to resolve Cypress configuration using ${util.inspect(options)}`
+  );
 
   const { argv, env } = options;
 
@@ -286,7 +288,9 @@ export function resolveEnvironment(options: {
   env: NodeJS.ProcessEnv;
   cwd: string;
 }): Record<string, any> {
-  debug(`attempting to resolve Cypress environment using ${options}`);
+  debug(
+    `attempting to resolve Cypress environment using ${util.inspect(options)}`
+  );
 
   const { argv, env } = options;
 
