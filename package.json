@@ -19,13 +19,14 @@
     "lib/**/*.d.ts"
   ],
   "scripts": {
+    "clean": "bash -O globstar -c 'rm -f lib/**/*.{js,d.ts}'",
     "build": "tsc",
     "watch": "tsc --watch",
     "fmt": "prettier --ignore-path .gitignore --write '**/*.ts'",
     "test": "npm run test:fmt && npm run test:unit",
     "test:fmt": "prettier --ignore-path .gitignore --check '**/*.ts'",
     "test:unit": "mocha",
-    "prepublishOnly": "npm run build && npm run test"
+    "prepublishOnly": "npm run clean && npm run build && npm run test"
   },
   "dependencies": {
     "debug": "^4.3.2",
