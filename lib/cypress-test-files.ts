@@ -8,25 +8,21 @@ import minimatch from "minimatch";
 
 import { assertIsString } from "./assertions";
 
-import {
-  resolveConfiguration,
-  resolveProjectPath,
-} from "./cypress-configuration";
+import { ICypressConfiguration } from "./cypress-configuration";
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true };
 
-export function resolveTestFiles(options: {
-  argv: string[];
-  env: NodeJS.ProcessEnv;
-  cwd: string;
-}): string[] {
+export function resolveTestFiles(
+  configuration: ICypressConfiguration
+): string[] {
   const {
+    projectRoot,
     integrationFolder,
     fixturesFolder,
     supportFile,
     testFiles,
     ignoreTestFiles,
-  } = resolveConfiguration(options);
+  } = configuration;
 
   const testFilesPatterns = [testFiles].flat();
   const ignoreTestFilesPatterns = [ignoreTestFiles].flat();
@@ -54,8 +50,6 @@ export function resolveTestFiles(options: {
 
     globIgnore.push(path.join(fixturesFolder, "**", "*"));
   }
-
-  const projectPath = resolveProjectPath(options);
 
   const globOptions = {
     sort: true,
