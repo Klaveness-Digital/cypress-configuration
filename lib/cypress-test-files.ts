@@ -10,6 +10,8 @@ import { assertIsString } from "./assertions";
 
 import { ICypressConfiguration } from "./cypress-configuration";
 
+import { ensureIsAbsolute } from "./path-helpers";
+
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true };
 
 export function resolveTestFiles(
@@ -55,7 +57,7 @@ export function resolveTestFiles(
     sort: true,
     absolute: true,
     nodir: true,
-    cwd: path.join(projectPath, integrationFolder),
+    cwd: ensureIsAbsolute(projectRoot, integrationFolder),
     ignore: globIgnore.flat(),
   };
 

@@ -14,6 +14,8 @@ import {
   isStringOrStringArray,
 } from "./type-guards";
 
+import { ensureIsAbsolute } from "./path-helpers";
+
 function isStringEntry(entry: [any, any]): entry is [string, string] {
   return typeof entry[0] === "string" && typeof entry[1] === "string";
 }
@@ -244,7 +246,7 @@ export function resolveConfiguration(options: {
 
   let configOrigin: Partial<ICypressConfiguration> = {};
 
-  const cypressConfigPath = path.join(
+  const cypressConfigPath = ensureIsAbsolute(
     projectPath,
     resolveConfigurationFile(options)
   );
@@ -343,7 +345,7 @@ export function resolveEnvironment(options: {
       })
   );
 
-  const cypressConfigPath = path.join(
+  const cypressConfigPath = ensureIsAbsolute(
     projectPath,
     resolveConfigurationFile(options)
   );
@@ -406,11 +408,7 @@ export function resolveProjectPath(options: {
     findArgumentValue(argv, "-P", false);
 
   if (customProjectPath) {
-    if (path.isAbsolute(customProjectPath)) {
-      return customProjectPath;
-    } else {
-      return path.join(cwd, customProjectPath);
-    }
+    return ensureIsAbsolute(cwd, customProjectPath);
   } else {
     return cwd;
   }
