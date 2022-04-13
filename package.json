@@ -1,12 +1,12 @@
 {
-  "name": "@badeball/cypress-configuration",
+  "name": "@klaveness/cypress-configuration",
   "version": "1.0.2",
   "author": "Jonas Amundsen",
   "license": "MIT",
-  "homepage": "https://github.com/badeball/cypress-configuration",
+  "homepage": "https://github.com/Klaveness-Digital/cypress-configuration",
   "repository": {
     "type": "git",
-    "url": "https://github.com/badeball/cypress-configuration.git"
+    "url": "https://github.com/Klaveness-Digital/cypress-configuration.git"
   },
   "keywords": [
     "cypress",
