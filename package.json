@@ -19,7 +19,7 @@
     "lib/**/*.d.ts"
   ],
   "scripts": {
-    "clean": "bash -O globstar -c 'rm lib/**/*.{js,d.ts}'",
+    "clean": "bash -O globstar -c 'rm -f lib/**/*.{js,d.ts}'",
     "build": "tsc",
     "watch": "tsc --watch",
     "fmt": "prettier --ignore-path .gitignore --write '**/*.ts'",
