@@ -32,6 +32,7 @@ export interface ICypressConfiguration {
   supportFile: string | false;
   testFiles: string | string[];
   ignoreTestFiles: string | string[];
+  env: Record<string, any>;
 }
 
 function validateConfigurationEntry(
@@ -282,7 +283,7 @@ export function resolveConfiguration(options: {
 
   debug(`resolved configuration of ${util.inspect(configuration)}`);
 
-  return configuration;
+  return { ...configuration, env: resolveEnvironment(options) };
 }
 
 export function resolveEnvironment(options: {
