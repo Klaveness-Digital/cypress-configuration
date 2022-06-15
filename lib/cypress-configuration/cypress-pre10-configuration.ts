@@ -4,17 +4,21 @@ import path from "path";
 
 import util from "util";
 
-import debug from "./debug";
+import minimatch from "minimatch";
 
-import { assert, assertAndReturn } from "./assertions";
+import glob from "glob";
+
+import debug from "../debug";
+
+import { assert, assertAndReturn, assertIsString } from "../assertions";
 
 import {
   isString,
   isStringOrFalse,
   isStringOrStringArray,
-} from "./type-guards";
+} from "../type-guards";
 
-import { ensureIsAbsolute } from "./path-helpers";
+import { ensureIsAbsolute } from "../path-helpers";
 
 function isStringEntry(entry: [any, any]): entry is [string, string] {
   return typeof entry[0] === "string" && typeof entry[1] === "string";
@@ -25,7 +29,7 @@ function isStringEntry(entry: [any, any]): entry is [string, string] {
  *
  * Definitions can found in https://github.com/cypress-io/cypress/blob/develop/cli/schema/cypress.schema.json.
  */
-export interface ICypressConfiguration {
+export interface ICypressPre10Configuration {
   projectRoot: string;
   integrationFolder: string;
   fixturesFolder: string | false;
@@ -38,7 +42,7 @@ export interface ICypressConfiguration {
 function validateConfigurationEntry(
   key: string,
   value: unknown
-): Partial<ICypressConfiguration> {
+): Partial<ICypressPre10Configuration> {
   switch (key) {
     case "projectRoot":
       if (!isString(value)) {
@@ -107,7 +111,7 @@ function parseJsonFile(filepath: string) {
   }
 }
 
-export function findLastIndex<T>(
+function findLastIndex<T>(
   collection: ArrayLike<T>,
   predicate: (value: T) => boolean,
   beforeIndex = collection.length
@@ -121,7 +125,7 @@ export function findLastIndex<T>(
   return -1;
 }
 
-export function* traverseArgvMatching(
+function* traverseArgvMatching(
   argv: string[],
   name: string,
   allowEqual: boolean
@@ -150,13 +154,13 @@ export function* traverseArgvMatching(
   }
 }
 
-export function* combine<T>(...generators: Generator<T, unknown, unknown>[]) {
+function* combine<T>(...generators: Generator<T, unknown, unknown>[]) {
   for (const generator of generators) {
     yield* generator;
   }
 }
 
-export function findArgumentValue(
+function findArgumentValue(
   argv: string[],
   name: string,
   allowEqual: boolean
@@ -166,15 +170,15 @@ export function findArgumentValue(
   }
 }
 
-export function toSnakeCase(value: string) {
+function toSnakeCase(value: string) {
   return value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
-export function capitalize(word: string) {
+function capitalize(word: string) {
   return word.toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
-export function toCamelCase(value: string) {
+function toCamelCase(value: string) {
   return value
     .split("_")
     .map((word, index) =>
@@ -183,11 +187,11 @@ export function toCamelCase(value: string) {
     .join("");
 }
 
-export function resolveConfiguration(options: {
+export function resolvePre10Configuration(options: {
   argv: string[];
   env: NodeJS.ProcessEnv;
   cwd: string;
-}): ICypressConfiguration {
+}): ICypressPre10Configuration {
   debug(
     `attempting to resolve Cypress configuration using ${util.inspect(options)}`
   );
@@ -196,7 +200,7 @@ export function resolveConfiguration(options: {
 
   const projectPath = resolveProjectPath(options);
 
-  const cliOrigin: Partial<ICypressConfiguration> = Object.assign(
+  const cliOrigin: Partial<ICypressPre10Configuration> = Object.assign(
     {},
     ...Array.from(
       combine(
@@ -207,7 +211,7 @@ export function resolveConfiguration(options: {
       .reverse()
       .flatMap((argument) => {
         const keypairExpr = /(?:^|,)([^=]+)=([^,$]+)/g;
-        const entries: Partial<ICypressConfiguration>[] = [];
+        const entries: Partial<ICypressPre10Configuration>[] = [];
         let match;
 
         while ((match = keypairExpr.exec(argument)) !== null) {
@@ -220,7 +224,7 @@ export function resolveConfiguration(options: {
 
   const envPrefixExpr = /^cypress_(.+)/i;
 
-  const envOrigin: Partial<ICypressConfiguration> = Object.assign(
+  const envOrigin: Partial<ICypressPre10Configuration> = Object.assign(
     {},
     ...Object.entries(env)
       .filter((entry) => {
@@ -245,7 +249,7 @@ export function resolveConfiguration(options: {
       })
   );
 
-  let configOrigin: Partial<ICypressConfiguration> = {};
+  let configOrigin: Partial<ICypressPre10Configuration> = {};
 
   const cypressConfigPath = ensureIsAbsolute(
     projectPath,
@@ -283,10 +287,10 @@ export function resolveConfiguration(options: {
 
   debug(`resolved configuration of ${util.inspect(configuration)}`);
 
-  return { ...configuration, env: resolveEnvironment(options) };
+  return { ...configuration, env: resolvePre10Environment(options) };
 }
 
-export function resolveEnvironment(options: {
+export function resolvePre10Environment(options: {
   argv: string[];
   env: NodeJS.ProcessEnv;
   cwd: string;
@@ -388,7 +392,7 @@ export function resolveEnvironment(options: {
   return environment;
 }
 
-export function resolveConfigurationFile(options: { argv: string[] }): string {
+function resolveConfigurationFile(options: { argv: string[] }): string {
   const { argv } = options;
 
   return (
@@ -398,10 +402,7 @@ export function resolveConfigurationFile(options: { argv: string[] }): string {
   );
 }
 
-export function resolveProjectPath(options: {
-  argv: string[];
-  cwd: string;
-}): string {
+function resolveProjectPath(options: { argv: string[]; cwd: string }): string {
   const { argv, cwd } = options;
 
   const customProjectPath =
@@ -413,4 +414,63 @@ export function resolveProjectPath(options: {
   } else {
     return cwd;
   }
+}
+
+const MINIMATCH_OPTIONS = { dot: true, matchBase: true };
+
+export function resolvePre10TestFiles(
+  configuration: ICypressPre10Configuration
+): string[] {
+  const {
+    projectRoot,
+    integrationFolder,
+    fixturesFolder,
+    supportFile,
+    testFiles,
+    ignoreTestFiles,
+  } = configuration;
+
+  const testFilesPatterns = [testFiles].flat();
+  const ignoreTestFilesPatterns = [ignoreTestFiles].flat();
+
+  assertIsString(
+    integrationFolder,
+    `Expected "integrationFolder" to be a string, got ${util.inspect(
+      integrationFolder
+    )}`
+  );
+
+  const globIgnore = [];
+
+  if (supportFile) {
+    globIgnore.push(supportFile);
+  }
+
+  if (fixturesFolder) {
+    assertIsString(
+      fixturesFolder,
+      `Expected "fixturesFolder" to be a string or false, got ${util.inspect(
+        fixturesFolder
+      )}`
+    );
+
+    globIgnore.push(path.join(fixturesFolder, "**", "*"));
+  }
+
+  const globOptions = {
+    sort: true,
+    absolute: true,
+    nodir: true,
+    cwd: ensureIsAbsolute(projectRoot, integrationFolder),
+    ignore: globIgnore.flat(),
+  };
+
+  return testFilesPatterns
+    .flatMap((testFilesPattern) => glob.sync(testFilesPattern, globOptions))
+    .filter((file) =>
+      ignoreTestFilesPatterns.every(
+        (ignoreTestFilesPattern) =>
+          !minimatch(file, ignoreTestFilesPattern, MINIMATCH_OPTIONS)
+      )
+    );
 }

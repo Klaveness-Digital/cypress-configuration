@@ -7,9 +7,9 @@ import util from "util";
 import assert from "assert";
 
 import {
-  resolveConfiguration,
-  resolveEnvironment,
-} from "./cypress-configuration";
+  resolvePre10Configuration,
+  resolvePre10Environment,
+} from "./cypress-pre10-configuration";
 
 interface CypressConfig {
   [key: string]: string | CypressConfig;
@@ -83,15 +83,25 @@ function example(
 
 describe("resolveConfiguration()", () => {
   // Default
-  example(resolveConfiguration, {}, "integrationFolder", "cypress/integration");
-  example(resolveConfiguration, {}, "fixturesFolder", "cypress/fixtures");
-  example(resolveConfiguration, {}, "supportFile", "cypress/support/index.js");
-  example(resolveConfiguration, {}, "testFiles", "**/*.*");
-  example(resolveConfiguration, {}, "ignoreTestFiles", "*.hot-update.js");
+  example(
+    resolvePre10Configuration,
+    {},
+    "integrationFolder",
+    "cypress/integration"
+  );
+  example(resolvePre10Configuration, {}, "fixturesFolder", "cypress/fixtures");
+  example(
+    resolvePre10Configuration,
+    {},
+    "supportFile",
+    "cypress/support/index.js"
+  );
+  example(resolvePre10Configuration, {}, "testFiles", "**/*.*");
+  example(resolvePre10Configuration, {}, "ignoreTestFiles", "*.hot-update.js");
 
   // Simple CLI override
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config", "integrationFolder=foo/bar"],
     },
@@ -99,7 +109,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config=integrationFolder=foo/bar"],
     },
@@ -107,7 +117,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-c", "integrationFolder=foo/bar"],
     },
@@ -117,7 +127,7 @@ describe("resolveConfiguration()", () => {
 
   // CLI override with preceding, comma-delimited configuration
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config", "foo=bar,integrationFolder=foo/bar"],
     },
@@ -125,7 +135,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config=foo=bar,integrationFolder=foo/bar"],
     },
@@ -133,7 +143,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-c", "foo=bar,integrationFolder=foo/bar"],
     },
@@ -143,7 +153,7 @@ describe("resolveConfiguration()", () => {
 
   // CLI override with succeeding, comma-delimited configuration
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config", "integrationFolder=foo/bar,foo=bar"],
     },
@@ -151,7 +161,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config=integrationFolder=foo/bar,foo=bar"],
     },
@@ -159,7 +169,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-c", "integrationFolder=foo/bar,foo=bar"],
     },
@@ -169,7 +179,7 @@ describe("resolveConfiguration()", () => {
 
   // CLI override with last match taking precedence
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: [
         "--config",
@@ -182,7 +192,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: [
         "--config=integrationFolder=baz",
@@ -193,7 +203,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-c", "integrationFolder=baz", "-c", "integrationFolder=foo/bar"],
     },
@@ -255,7 +265,7 @@ describe("resolveConfiguration()", () => {
 
   for (let { env, expected } of envTestMatrix) {
     example(
-      resolveConfiguration,
+      resolvePre10Configuration,
       {
         env,
       },
@@ -266,7 +276,7 @@ describe("resolveConfiguration()", () => {
 
   // Override with cypress.json
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       cypressConfig: { integrationFolder: "foo/bar" },
     },
@@ -276,7 +286,7 @@ describe("resolveConfiguration()", () => {
 
   // Override with cypress.json in custom location
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config-file", "foo.json"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -286,7 +296,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config-file=foo.json"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -296,7 +306,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-C", "foo.json"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -308,7 +318,7 @@ describe("resolveConfiguration()", () => {
 
   // Override with cypress.json & custom project path.
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--project", "foo"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -318,7 +328,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--project=foo"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -328,7 +338,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-P", "foo"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -340,7 +350,7 @@ describe("resolveConfiguration()", () => {
 
   // Override with cypress.json in custom location & custom project path.
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config-file", "foo.json", "--project", "foo"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -351,7 +361,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["--config-file=foo.json", "--project", "foo"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -362,7 +372,7 @@ describe("resolveConfiguration()", () => {
     "foo/bar"
   );
   example(
-    resolveConfiguration,
+    resolvePre10Configuration,
     {
       argv: ["-C", "foo.json", "--project", "foo"],
       cypressConfig: { integrationFolder: "foo/bar" },
@@ -376,11 +386,11 @@ describe("resolveConfiguration()", () => {
 
 describe("resolveEnvironment()", () => {
   // Default
-  example(resolveEnvironment, {}, "FOO", undefined);
+  example(resolvePre10Environment, {}, "FOO", undefined);
 
   // Simple CLI override
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env", "FOO=foo"],
     },
@@ -388,7 +398,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env=FOO=foo"],
     },
@@ -396,7 +406,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-e", "FOO=foo"],
     },
@@ -406,7 +416,7 @@ describe("resolveEnvironment()", () => {
 
   // CLI override with preceding, comma-delimited configuration
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env", "BAR=bar,FOO=foo"],
     },
@@ -414,7 +424,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env=BAR=bar,FOO=foo"],
     },
@@ -422,7 +432,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-e", "BAR=bar,FOO=foo"],
     },
@@ -432,7 +442,7 @@ describe("resolveEnvironment()", () => {
 
   // CLI override with succeeding, comma-delimited configuration
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env", "FOO=foo,BAR=bar"],
     },
@@ -440,7 +450,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env=FOO=foo,BAR=bar"],
     },
@@ -448,7 +458,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-e", "FOO=foo,BAR=bar"],
     },
@@ -458,7 +468,7 @@ describe("resolveEnvironment()", () => {
 
   // CLI override with last match taking precedence
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env", "FOO=baz", "--env", "FOO=foo"],
     },
@@ -466,7 +476,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env=FOO=baz", "--env=FOO=foo"],
     },
@@ -474,7 +484,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-e", "FOO=baz", "-e", "FOO=foo"],
     },
@@ -482,7 +492,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--env", "FOO=foo", "--env", "BAR=BAR"],
     },
@@ -522,7 +532,7 @@ describe("resolveEnvironment()", () => {
 
   for (let { env, expected } of envTestMatrix) {
     example(
-      resolveEnvironment,
+      resolvePre10Environment,
       {
         env,
       },
@@ -533,7 +543,7 @@ describe("resolveEnvironment()", () => {
 
   // Override with cypress.json
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       cypressConfig: { env: { FOO: "foo" } },
     },
@@ -543,7 +553,7 @@ describe("resolveEnvironment()", () => {
 
   // Override with cypress.json in custom location
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--config-file", "foo.json"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -553,7 +563,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--config-file=foo.json"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -563,7 +573,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-C", "foo.json"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -575,7 +585,7 @@ describe("resolveEnvironment()", () => {
 
   // Override with cypress.env.json
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       cypressEnvConfig: { FOO: "foo" },
     },
@@ -585,7 +595,7 @@ describe("resolveEnvironment()", () => {
 
   // Override with cypress.json & custom project path.
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--project", "foo"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -595,7 +605,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--project=foo"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -605,7 +615,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-P", "foo"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -617,7 +627,7 @@ describe("resolveEnvironment()", () => {
 
   // Override with cypress.json in custom location & custom project path.
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--project", "foo", "--config-file", "foo.json"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -628,7 +638,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--project=foo", "--config-file", "foo.json"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -639,7 +649,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-P", "foo", "--config-file", "foo.json"],
       cypressConfig: { env: { FOO: "foo" } },
@@ -652,7 +662,7 @@ describe("resolveEnvironment()", () => {
 
   // Override with cypress.env.json & custom project path.
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--project", "foo"],
       cypressEnvConfig: { FOO: "foo" },
@@ -662,7 +672,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["--project=foo"],
       cypressEnvConfig: { FOO: "foo" },
@@ -672,7 +682,7 @@ describe("resolveEnvironment()", () => {
     "foo"
   );
   example(
-    resolveEnvironment,
+    resolvePre10Environment,
     {
       argv: ["-P", "foo"],
       cypressEnvConfig: { FOO: "foo" },
